@@ -3,14 +3,301 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Am I Dumb?</title>
+    <meta name="description" content="Track your silly moments with joy! A fun counter app to embrace your human moments and celebrate imperfection.">
+    <meta name="keywords" content="fun app, counter, silly moments, happiness, self-love">
+    <meta name="author" content="Am I Dumb App">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Am I Dumb? - Fun Counter App">
+    <meta property="og:description" content="Track your silly moments with joy!">
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Am I Dumb? - Fun Counter App">
+    <meta name="twitter:description" content="Track your silly moments with joy!">
+    
+    <title>Am I Dumb? - Fun Counter App</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🧠</text></svg>">
+    
+    <!-- React -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        .float-animation {
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 20px rgba(168, 85, 247, 0.4); }
+            50% { box-shadow: 0 0 40px rgba(168, 85, 247, 0.8); }
+        }
+        .pulse-glow {
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+    </style>
 </head>
 <body>
     <div id="root"></div>
-    <script type="text/babel" src="app.js"></script>
+    
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function AmIDumbApp() {
+          const [count, setCount] = useState(0);
+          const [totalAllTime, setTotalAllTime] = useState(0);
+          const [showConfetti, setShowConfetti] = useState(false);
+          const [motivationalMessage, setMotivationalMessage] = useState('');
+          const [dumbLevel, setDumbLevel] = useState(null);
+
+          // Safe localStorage wrapper
+          const storage = {
+            getItem: (key) => {
+              try {
+                return localStorage.getItem(key);
+              } catch {
+                return null;
+              }
+            },
+            setItem: (key, value) => {
+              try {
+                localStorage.setItem(key, value);
+              } catch (e) {
+                console.log('Storage not available');
+              }
+            }
+          };
+
+          // Load saved data on mount
+          useEffect(() => {
+            const savedCount = parseInt(storage.getItem('dumbCount') || '0');
+            const savedTotal = parseInt(storage.getItem('dumbTotalAllTime') || '0');
+            setCount(savedCount);
+            setTotalAllTime(savedTotal);
+          }, []);
+
+          // Save data whenever count changes
+          useEffect(() => {
+            storage.setItem('dumbCount', count.toString());
+            storage.setItem('dumbTotalAllTime', totalAllTime.toString());
+            updateDumbLevel(count);
+          }, [count, totalAllTime]);
+
+          const motivationalMessages = [
+            "Every mistake is a step towards brilliance! 🌟",
+            "You're not dumb, you're just collecting life experiences! 😄",
+            "Einstein made mistakes too! Keep going! 🧠",
+            "Oops moments make the best stories! 📖",
+            "You're learning and growing with every silly moment! 🌱",
+            "Perfection is boring, embrace the chaos! 🎉",
+            "Your silly moments make life fun! 💫",
+            "Being human is about making mistakes - you're doing great! ❤️",
+            "Smart people do silly things all the time! 🎓",
+            "You're building character, one oops at a time! 💪",
+            "Life's too short to be serious all the time! 😊",
+            "Your mistakes today are your wisdom tomorrow! 🌈",
+            "Embrace the silly, celebrate the you! 🎊",
+            "Nobody's perfect, and that's what makes you special! ✨",
+            "Laughing at yourself is a sign of intelligence! 😂"
+          ];
+
+          const dumbLevels = [
+            { max: 5, title: '🌟 Genius in Disguise', color: 'text-green-600', bg: 'bg-green-50' },
+            { max: 10, title: '😊 Perfectly Human', color: 'text-blue-600', bg: 'bg-blue-50' },
+            { max: 20, title: '🎭 Comedy Gold', color: 'text-purple-600', bg: 'bg-purple-50' },
+            { max: 50, title: '🎪 Life of the Party', color: 'text-pink-600', bg: 'bg-pink-50' },
+            { max: 100, title: '🌈 Living Your Best Life', color: 'text-yellow-600', bg: 'bg-yellow-50' },
+            { max: Infinity, title: '👑 Legendary Spirit', color: 'text-red-600', bg: 'bg-red-50' }
+          ];
+
+          const updateDumbLevel = (currentCount) => {
+            const level = dumbLevels.find(l => currentCount <= l.max);
+            setDumbLevel(level);
+          };
+
+          const handleIncrement = () => {
+            const newCount = count + 1;
+            setCount(newCount);
+            setTotalAllTime(totalAllTime + 1);
+            
+            const randomMessage = motivationalMessages[Math.floor(Math.random() * motivationalMessages.length)];
+            setMotivationalMessage(randomMessage);
+            
+            // Show confetti effect
+            setShowConfetti(true);
+            setTimeout(() => setShowConfetti(false), 1000);
+          };
+
+          const handleReset = () => {
+            if (window.confirm('Reset your daily dumb score? (All-time total will be preserved)')) {
+              setCount(0);
+              setMotivationalMessage("Fresh start! Remember, you're amazing! 💖");
+            }
+          };
+
+          const shareScore = () => {
+            const text = `My Dumb Score today is ${count}! I'm a ${dumbLevel?.title}! 😄 #AmIDumb #EmbraceTheSilly`;
+            if (navigator.share) {
+              navigator.share({ text });
+            } else {
+              navigator.clipboard.writeText(text).then(() => {
+                alert('Score copied to clipboard! 📋');
+              }).catch(() => {
+                alert(text);
+              });
+            }
+          };
+
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-purple-100 via-pink-100 to-yellow-100 p-4">
+              <div className="max-w-md mx-auto">
+                {/* Header */}
+                <div className="text-center mb-8 pt-8">
+                  <div className="flex items-center justify-center mb-4">
+                    <div className="text-6xl mr-3 float-animation">🧠</div>
+                    <h1 className="text-4xl font-bold text-gray-800">Am I Dumb?</h1>
+                  </div>
+                  <p className="text-gray-600 italic">Track your silly moments with joy! 😊</p>
+                </div>
+
+                {/* Main Counter Card */}
+                <div className="bg-white rounded-3xl shadow-2xl p-8 mb-6 relative overflow-hidden">
+                  {showConfetti && (
+                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+                      <div className="text-6xl animate-ping">🎉</div>
+                    </div>
+                  )}
+
+                  {/* Current Level Badge */}
+                  {dumbLevel && (
+                    <div className={`${dumbLevel.bg} ${dumbLevel.color} rounded-full px-6 py-3 mb-6 text-center font-bold text-lg`}>
+                      {dumbLevel.title}
+                    </div>
+                  )}
+
+                  {/* Counter Display */}
+                  <div className="text-center mb-6">
+                    <p className="text-gray-600 mb-2">Today's Dumb Score</p>
+                    <div className="text-8xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
+                      {count}
+                    </div>
+                  </div>
+
+                  {/* Big Counter Button */}
+                  <button
+                    onClick={handleIncrement}
+                    className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white text-2xl font-bold py-6 rounded-2xl shadow-lg transform transition hover:scale-105 active:scale-95 mb-4 pulse-glow"
+                  >
+                    I Did Something Silly! 😅
+                  </button>
+
+                  {/* Motivational Message */}
+                  {motivationalMessage && (
+                    <div className="bg-gradient-to-r from-yellow-100 to-pink-100 rounded-xl p-4 text-center">
+                      <p className="text-gray-700 font-medium">{motivationalMessage}</p>
+                    </div>
+                  )}
+                </div>
+
+                {/* Stats Card */}
+                <div className="bg-white rounded-2xl shadow-xl p-6 mb-6">
+                  <h2 className="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                    <span className="mr-2">📊</span>
+                    Your Journey
+                  </h2>
+                  
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-blue-50 rounded-xl p-4 text-center">
+                      <div className="text-3xl mb-2">🏆</div>
+                      <p className="text-gray-600 text-sm">Today's Score</p>
+                      <p className="text-3xl font-bold text-blue-600">{count}</p>
+                    </div>
+                    
+                    <div className="bg-purple-50 rounded-xl p-4 text-center">
+                      <div className="text-3xl mb-2">✨</div>
+                      <p className="text-gray-600 text-sm">All-Time Total</p>
+                      <p className="text-3xl font-bold text-purple-600">{totalAllTime}</p>
+                    </div>
+                  </div>
+
+                  <div className="mt-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-xl p-4">
+                    <div className="flex items-center justify-center">
+                      <span className="mr-2">❤️</span>
+                      <p className="text-gray-700 text-sm font-medium">
+                        Average silliness: {totalAllTime > 0 ? (totalAllTime / Math.max(1, Math.ceil(totalAllTime / 10))).toFixed(1) : 0} per day
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="grid grid-cols-2 gap-4 mb-6">
+                  <button
+                    onClick={handleReset}
+                    className="bg-white hover:bg-gray-50 text-gray-700 font-semibold py-4 rounded-xl shadow-lg flex items-center justify-center transition transform hover:scale-105"
+                  >
+                    <span className="mr-2">🔄</span>
+                    Reset Day
+                  </button>
+                  
+                  <button
+                    onClick={shareScore}
+                    className="bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white font-semibold py-4 rounded-xl shadow-lg flex items-center justify-center transition transform hover:scale-105"
+                  >
+                    <span className="mr-2">😊</span>
+                    Share Score
+                  </button>
+                </div>
+
+                {/* Happiness Quote */}
+                <div className="bg-gradient-to-r from-yellow-200 to-pink-200 rounded-2xl p-6 text-center shadow-xl mb-6">
+                  <p className="text-gray-800 font-medium text-lg mb-2">
+                    "Intelligence is knowing you made a mistake. Wisdom is laughing about it!"
+                  </p>
+                  <p className="text-gray-600 text-sm">Keep smiling, keep growing! 🌈</p>
+                </div>
+
+                {/* Footer */}
+                <div className="text-center pb-8">
+                  <p className="text-gray-600 text-sm mb-4">
+                    Remember: You're not dumb, you're wonderfully human! ❤️
+                  </p>
+                  <p className="text-gray-500 text-xs">
+                    Made with 💜 for everyone who embraces their perfectly imperfect self
+                  </p>
+                </div>
+              </div>
+            </div>
+          );
+        }
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AmIDumbApp />);
+    </script>
+    
+    <!-- Optional: Google Analytics - Replace YOUR-GA-ID with your actual ID -->
+    <!--
+    <script async src="https://www.googletagmanager.com/gtag/js?id=YOUR-GA-ID"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'YOUR-GA-ID');
+    </script>
+    -->
 </body>
 </html>
